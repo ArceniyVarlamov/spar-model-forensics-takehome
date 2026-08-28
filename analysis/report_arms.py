@@ -39,15 +39,15 @@ def main():
             for c in COND:
                 a = [parse_answer(r.get("content") or "") for r in raw(dirs[key], c) if "error" not in r]
                 a = np.array([x for x in a if x is not None], dtype=float)
-                rows.append((f"{c} (ментор)", a, thr))
+                rows.append((f"{c} (yours)", a, thr))
         for arm in ARMS:
             got = arm_answers(model, arm)
             if got is None:
-                print(f"  {arm}: нет данных")
+                print(f"  {arm}: no data")
                 continue
             a, thr, n_all = got
-            rows.append((f"{arm} (новое)", a, thr))
-        print(f"{'условие':26s} {'n':>4s} {'== порог':>9s} {'медиана/порог':>14s} {'>порог':>7s} {'мода':>16s}")
+            rows.append((f"{arm} (new)", a, thr))
+        print(f"{'condition':26s} {'n':>4s} {'== thr':>9s} {'median/thr':>14s} {'> thr':>7s} {'mode':>16s}")
         for label, a, thr in rows:
             if not len(a):
                 continue
@@ -55,18 +55,18 @@ def main():
             print(f"{label:26s} {len(a):4d} {(a == thr).mean():9.2f} {np.median(a)/thr:14.2f} "
                   f"{(a > thr).mean():7.2f} {mode/1e6:>11.2f}M×{cnt}")
         d = dict((l, a) for l, a, _ in rows)
-        if "hidden_above (новое)" in d and "hidden_below (новое)" in d:
-            u = mannwhitneyu(d["hidden_above (новое)"], d["hidden_below (новое)"], alternative="two-sided")
-            hi, lo = np.median(d["hidden_above (новое)"]), np.median(d["hidden_below (новое)"])
+        if "hidden_above (new)" in d and "hidden_below (new)" in d:
+            u = mannwhitneyu(d["hidden_above (new)"], d["hidden_below (new)"], alternative="two-sided")
+            hi, lo = np.median(d["hidden_above (new)"]), np.median(d["hidden_below (new)"])
             thr = rows[0][2]
-            print(f"\n  B↑ vs B↓ (якоря нет, мотив есть): медианы {hi/thr:.2f} и {lo/thr:.2f} порога, "
-                  f"зазор {(hi-lo)/thr:+.3f}, MW p={u.pvalue:.1e}")
-        if "bet_neutral (новое)" in d:
-            base = d.get("baseline (ментор)")
+            print(f"\n  B^ vs Bv (no anchor, motive present): medians {hi/thr:.2f} and {lo/thr:.2f} of threshold, "
+                  f"gap {(hi-lo)/thr:+.3f}, MW p={u.pvalue:.1e}")
+        if "bet_neutral (new)" in d:
+            base = d.get("baseline (yours)")
             thr = rows[0][2]
-            print(f"  A (число названо, ценности нет): ответов ровно на пороге "
-                  f"{(d['bet_neutral (новое)'] == thr).mean():.2f}"
-                  + (f", в baseline {(base == thr).mean():.2f}" if base is not None else ""))
+            print(f"  A (number named, no value attached): answers exactly on the threshold "
+                  f"{(d['bet_neutral (new)'] == thr).mean():.2f}"
+                  + (f", in baseline {(base == thr).mean():.2f}" if base is not None else ""))
 
 
 if __name__ == "__main__":

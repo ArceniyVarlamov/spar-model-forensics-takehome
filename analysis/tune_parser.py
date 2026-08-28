@@ -65,9 +65,9 @@ def rule_label(text):
     return rule_headline(text)
 
 
-RULES = {"last (прежнее)": rule_last, "first": rule_first,
+RULES = {"last (former)": rule_last, "first": rule_first,
          "headline(1)": lambda t: rule_headline(t, 1),
-         "headline(2) (текущее)": rule_headline, "label-then-headline": rule_label}
+         "headline(2) (current)": rule_headline, "label-then-headline": rule_label}
 
 
 def set_baseline():
@@ -103,8 +103,8 @@ def score(rule, data):
 
 def main():
     b, w = set_baseline(), set_bet()
-    print(f"baseline: {len(b)} меток, ставочные условия: {len(w)} меток\n")
-    print(f"{'правило':24s} {'baseline':>10s} {'ставка':>10s} {'ошибок ровно на пороге':>24s}")
+    print(f"baseline: {len(b)} labels, bet conditions: {len(w)} labels\n")
+    print(f"{'rule':24s} {'baseline':>10s} {'bet':>10s} {'errors on the threshold':>24s}")
     for name, rule in RULES.items():
         sb, _ = score(rule, b)
         sw, thr_err = (score(rule, w) if w else (float("nan"), 0))

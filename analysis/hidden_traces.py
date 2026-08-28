@@ -24,7 +24,7 @@ SKEW = re.compile(r"((?:skew|bias|inflate|shade|nudge|tilt|push|adjust|err)[^.]{
 
 
 def main():
-    print(f"{'model':22s} {'arm':14s} {'n':>4s} {'о скрытом пороге':>17s} {'о завышении':>13s}")
+    print(f"{'model':22s} {'arm':14s} {'n':>4s} {'on hidden thr.':>15s} {'on skewing high':>16s}")
     for mdir in sorted(p for p in NEW.glob("*") if p.is_dir()):
         for arm in ("hidden_above", "hidden_below"):
             p = mdir / f"{arm}.json"
@@ -32,12 +32,12 @@ def main():
                 continue
             rows = [r for r in json.loads(p.read_text())["rows"] if "error" not in r]
             if not rows:
-                print(f"{mdir.name:22s} {arm:14s} {0:4d} {'нет данных':>17s}")
+                print(f"{mdir.name:22s} {arm:14s} {0:4d} {'no data':>15s}")
                 continue
             t = [(r.get("reasoning") or "") + "\n" + (r.get("content") or "") for r in rows]
             g = sum(bool(GUESS.search(x)) for x in t) / len(t)
             s = sum(bool(SKEW.search(x)) for x in t) / len(t)
-            print(f"{mdir.name:22s} {arm:14s} {len(t):4d} {g:17.2f} {s:13.2f}")
+            print(f"{mdir.name:22s} {arm:14s} {len(t):4d} {g:15.2f} {s:16.2f}")
 
 
 if __name__ == "__main__":

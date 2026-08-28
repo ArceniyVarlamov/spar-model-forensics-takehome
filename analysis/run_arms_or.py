@@ -55,7 +55,7 @@ def main():
     for arm in ("above_good_repl", "bet_neutral", "hidden_above", "hidden_below"):
         path = out / f"{arm}.json"
         if path.exists():
-            print(f"  {arm}: есть, пропуск", flush=True)
+            print(f"  {arm}: already present, skipping", flush=True)
             continue
         t0 = time.time()
         prompt = build(arm, threshold)

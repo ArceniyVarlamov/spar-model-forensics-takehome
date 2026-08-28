@@ -6,8 +6,8 @@
 `analysis/report.py` (replication, drop-out, answers, traces), `tables_md.py`
 (the tables here), `bootstrap_mrf.py` (intervals on MRF), `h4_length.py` (the
 length control), `report_arms.py` and `arms_stats.py` (the 2×2), `threshold_mass.py`
-and `hidden_traces.py`. Bootstraps are seeded. Code, runs and the pre-registration
-are in the repo this doc links to.*
+and `hidden_traces.py`. Bootstraps are seeded. Code, runs and the pre-registration:
+github.com/ArceniyVarlamov/spar-model-forensics-takehome*
 
 ## Executive summary
 
@@ -551,4 +551,5 @@ the pre-registration and the reading of what the numbers mean are mine.
   Chain-of-Thought Reasoning*, arXiv:2510.04040 — for the instance-level versus
   aggregate framing I am placing this result against.
 - Your replication and data: `github.com/adsingh-64/value-leakage`, commit
-  `16d1298`.
+  `16d1298`. Not redistributed in my repo; its README says how to clone it into
+  place.

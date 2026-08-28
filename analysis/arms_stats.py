@@ -18,8 +18,8 @@ from analysis.answers import parse_answer
 NEW = Path(__file__).resolve().parents[1] / "runs_new"
 B = int(sys.argv[1]) if len(sys.argv) > 1 else 4000
 SEED = int(sys.argv[2]) if len(sys.argv) > 2 else 0
-LABEL = {"above_good_repl": "A_repl (контроль бэкенда)", "bet_neutral": "A (число, без ценности)",
-         "hidden_above": "B^ (ценность, без числа)", "hidden_below": "Bv (ценность, без числа)"}
+LABEL = {"above_good_repl": "A_repl (backend control)", "bet_neutral": "A (number, no value)",
+         "hidden_above": "B^ (value, no number)", "hidden_below": "Bv (value, no number)"}
 
 
 def iqr(a):
@@ -66,7 +66,7 @@ def main():
         key = next((k for k in dirs if k == model), None)
         print("\n" + "=" * 96 + f"\n{model}\n" + "=" * 96)
         if not key:
-            print("нет соответствия в сетке ментора — только новые плечи")
+            print("no match in your grid — new arms only")
         cells = {}
         if key:
             R = load(dirs[key])
@@ -81,14 +81,14 @@ def main():
                 cells[arm] = got
 
         base = cells.get("baseline", (None, None))[0]
-        print(f"{'условие':28s} {'n':>4s} {'медиана/порог':>14s} {'IQR/порог':>10s} "
-              f"{'IQR ÷ base':>22s} {'медиана длины':>14s}")
+        print(f"{'condition':28s} {'n':>4s} {'median/thr':>14s} {'IQR/thr':>10s} "
+              f"{'IQR / base':>22s} {'median length':>14s}")
         for name, (a, ln) in cells.items():
             r = ""
             if base is not None and name != "baseline" and a.size >= 5:
                 pt, lo, hi = ratio_ci(rng, a, base)
                 r = f"{pt:.2f} [{lo:.2f}, {hi:.2f}]"
-            print(f"{LABEL.get(name, name + ' (ментор)'):28s} {a.size:4d} {np.median(a):14.2f} "
+            print(f"{LABEL.get(name, name + ' (yours)'):28s} {a.size:4d} {np.median(a):14.2f} "
                   f"{iqr(a):10.2f} {r:>22s} {np.median(ln):14,.0f}")
 
         def contrast(x, y, lab):
@@ -101,19 +101,19 @@ def main():
             print(f"  {lab:44s} MW p={p:.2f}")
 
         print()
-        contrast("above_good_repl", "above_good", "контроль бэкенда vs его above")
-        contrast("hidden_above", "hidden_below", "B^ vs Bv (без числа)")
+        contrast("above_good_repl", "above_good", "backend control vs your above")
+        contrast("hidden_above", "hidden_below", "B^ vs Bv (no number)")
         contrast("bet_neutral", "baseline", "A vs baseline")
-        contrast("bet_neutral", "above_good", "A vs его above")
+        contrast("bet_neutral", "above_good", "A vs your above")
 
         if "hidden_above" in cells and "hidden_below" in cells:
             for n in (40, 400):
-                print(f"  мощность B^ vs Bv при n={n:<4d}                        {power(rng, cells['hidden_above'][0], cells['hidden_below'][0], n):.2f}")
+                print(f"  power, B^ vs Bv at n={n:<4d}                             {power(rng, cells['hidden_above'][0], cells['hidden_below'][0], n):.2f}")
         if "below_good" in cells and "above_good" in cells:
-            print(f"  мощность его below vs above при n=40                  {power(rng, cells['below_good'][0], cells['above_good'][0], 40):.2f}")
+            print(f"  power, your below vs above at n=40                      {power(rng, cells['below_good'][0], cells['above_good'][0], 40):.2f}")
         if "bet_neutral" in cells and base is not None:
             for n in (40, 200, 400, 800):
-                print(f"  мощность A vs baseline при n={n:<4d}                     {power(rng, cells['bet_neutral'][0], base, n):.2f}")
+                print(f"  power, A vs baseline at n={n:<4d}                        {power(rng, cells['bet_neutral'][0], base, n):.2f}")
 
 
 if __name__ == "__main__":

@@ -62,19 +62,19 @@ def main():
     straddle = [r['model'] for r in rows if r['lo'] < 0 < r['hi']]
     strong = [r['model'] for r in rows if r['p_pos'] >= 0.9]
 
-    print(f"\nпар моделей с непересекающимися 95% интервалами: {len(sep)} из {len(pairs)}")
+    print(f"\nmodel pairs with non-overlapping 95% intervals: {len(sep)} of {len(pairs)}")
     for s in sep:
         print(f"  {s[0]} vs {s[1]}")
-    print(f"интервалов, накрывающих ноль: {len(straddle)} — {', '.join(straddle)}")
-    print(f"моделей с P(MRF>0) >= 0.9: {len(strong)} — {', '.join(strong)}")
+    print(f"intervals covering zero: {len(straddle)} — {', '.join(straddle)}")
+    print(f"models with P(MRF>0) >= 0.9: {len(strong)} — {', '.join(strong)}")
 
     rho, p = spearmanr([r['mrf'] for r in rows], [r['shift'] for r in rows])
-    print(f"\nранговая корреляция MRF и сдвига ответа: rho={rho:+.2f}, p={p:.2f}, n={len(rows)}")
+    print(f"\nrank correlation of MRF with the answer-level shift: rho={rho:+.2f}, p={p:.2f}, n={len(rows)}")
 
-    # то же самое для сдвига ответа — во сколько раз точнее та же величина
-    # на тех же роллаутах, если мерить её там, где ставка выплачивается
-    print("\nдля сравнения — сдвиг медианы ответа, бутстрап тем же способом")
-    print(f"{'model':24s} {'сдвиг':>8s} {'95% CI':>20s}")
+    # the same treatment for the answer-level shift — how much more precise the
+    # same rollouts are when measured where the bet actually pays out
+    print("\nfor comparison — shift of the median answer, bootstrapped the same way")
+    print(f"{'model':24s} {'shift':>8s} {'95% CI':>20s}")
     ar = []
     for name, d in run_dirs().items():
         R = load(d)
@@ -89,8 +89,8 @@ def main():
     a_sep = sum(1 for x, y in combinations(ar, 2) if x['hi'] < y['lo'] or y['hi'] < x['lo'])
     a_nz = sum(1 for r in ar if not (r['lo'] < 0 < r['hi']))
     m_nz = sum(1 for r in rows if not (r['lo'] < 0 < r['hi']))
-    print(f"\nпар разделено: MRF {len(sep)}/{len(pairs)}, сдвиг ответа {a_sep}/{len(pairs)}")
-    print(f"интервалов, не накрывающих ноль: MRF {m_nz}/10, сдвиг ответа {a_nz}/10")
+    print(f"\npairs separated: MRF {len(sep)}/{len(pairs)}, answer shift {a_sep}/{len(pairs)}")
+    print(f"intervals clear of zero: MRF {m_nz}/10, answer shift {a_nz}/10")
 
 
 if __name__ == "__main__":

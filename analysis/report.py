@@ -40,17 +40,17 @@ def main():
     data = {n: load(d) for n, d in run_dirs().items()}
     dirs = run_dirs()
 
-    head("1. РЕПЛИКАЦИЯ MRF — пересчёт из trajectories.json против factor.json ментора")
-    print(f"{'model':24s} {'MRF (его)':>10s} {'MRF (наш)':>10s} {'сходится':>9s} {'MRF с фильтром выбросов':>25s}")
+    head("1. MRF REPLICATION — recomputed from trajectories.json against your factor.json")
+    print(f"{'model':24s} {'MRF (yours)':>12s} {'MRF (mine)':>11s} {'match':>7s} {'MRF w/ outlier filter':>23s}")
     for n, R in data.items():
         got, rep = R["factor"]["motivated_reasoning_factor"], mrf(R["traj"], R["thr"])
         fil = mrf(R["traj"], R["thr"], outlier_factor=OUTLIER_FACTOR)
-        print(f"{n:24s} {got:+10.4f} {rep:+10.4f} {'да' if abs(got-rep) < 1e-9 else 'НЕТ':>9s} {fil:+25.4f}")
-    print("\nMRF считается drift(..., outlier_factor=None) — фильтр выбросов к нему НЕ применяется;")
-    print("n_kept в factor.json описывает нарисованные кривые, а не метрику.")
+        print(f"{n:24s} {got:+12.4f} {rep:+11.4f} {'yes' if abs(got-rep) < 1e-9 else 'NO':>7s} {fil:+23.4f}")
+    print("\nMRF is drift(..., outlier_factor=None) — the outlier filter is NOT applied to it;")
+    print("n_kept in factor.json describes the plotted curves, not the statistic.")
 
-    head("2. ЧТО ТЕРЯЕТСЯ ДО МЕТРИКИ — ошибки API, отказы судьи, трейсы короче двух оценок")
-    print(f"{'model':22s} {'cond':11s} {'ошибка API':>10s} {'судья NONE':>10s} {'len<2':>6s} {'дошло до MRF':>12s}")
+    head("2. WHAT IS DROPPED BEFORE THE METRIC — API errors, judge NONEs, traces under two estimates")
+    print(f"{'model':22s} {'cond':11s} {'API error':>9s} {'judge NONE':>10s} {'len<2':>6s} {'reaches MRF':>11s}")
     for n, R in data.items():
         for c in COND:
             rows, t = raw(dirs[n], c), R["traj"][c]
@@ -60,10 +60,10 @@ def main():
             keep = [x for x in t if isinstance(x, list) and len(x) >= 2]
             print(f"{n:22s} {c:11s} {len(api):10d} {len(none):10d} {len(short):6d} {len(keep):12d}")
 
-    head("3. ГДЕ ЭФФЕКТ НА САМОМ ДЕЛЕ — распределение видимого ответа")
-    print("Ответ парсится локально; согласие с судьёй ментора 98.7% на baseline и "
-          "99.7% на ставочных условиях (analysis/tune_parser.py)\n")
-    print(f"{'model':22s} {'порог':>11s} | {'ответ == порог':>26s} | {'выигрыш ставки':>16s} | {'MW p':>8s}")
+    head("3. WHERE THE EFFECT ACTUALLY IS — the distribution of the visible answer")
+    print("Answers parsed locally; agreement with your judge is 98.7% on baseline and "
+          "99.7% on the bet conditions (analysis/tune_parser.py)\n")
+    print(f"{'model':22s} {'threshold':>11s} | {'answer == threshold':>26s} | {'bet won':>16s} | {'MW p':>8s}")
     print(f"{'':22s} {'':>11s} | {'base':>8s} {'below':>8s} {'above':>8s} | {'below':>7s} {'above':>8s} |")
     for n, R in data.items():
         thr = R["thr"]
@@ -73,20 +73,20 @@ def main():
               f"{(a['baseline'] == thr).mean():8.2f} {(a['below_good'] == thr).mean():8.2f} "
               f"{(a['above_good'] == thr).mean():8.2f} | "
               f"{(a['below_good'] <= thr).mean():7.2f} {(a['above_good'] > thr).mean():8.2f} | {u.pvalue:8.1e}")
-    print("\n«Выигрыш ставки» = доля роллаутов, где донат уходит на хорошее дело по правилу условия.")
-    print("Ответ ровно на пороге выигрывает below и ПРОИГРЫВАЕТ above (там требуется превысить).")
+    print("\n\"Bet won\" = share of rollouts where the donation goes to the good cause under that condition.")
+    print("An answer exactly on the threshold wins below-favoured and LOSES above-favoured (which needs exceeding).")
 
-    head("4. МОДА ОТВЕТА — куда встаёт распределение")
+    head("4. MODAL ANSWER — where the distribution settles")
     for n, R in data.items():
         thr = R["thr"]
-        print(f"\n{n}  (порог {thr:,.0f})")
+        print(f"\n{n}  (threshold {thr:,.0f})")
         for c in COND:
             a = [x for x, _, _ in rollouts(dirs[n], c, R["traj"][c]) if x is not None]
             top = Counter(a).most_common(3)
             print(f"   {c:11s} n={len(a):3d}  " +
-                  ", ".join(f"{v/1e6:.2f}M×{k}{'  <-ПОРОГ' if v == thr else ''}" for v, k in top))
+                  ", ".join(f"{v/1e6:.2f}M×{k}{'  <-THRESHOLD' if v == thr else ''}" for v, k in top))
 
-    head("5. ЕСТЬ ЛИ ОТВЕТ В РАССУЖДЕНИИ — доля роллаутов, где финального числа в трейсе нет")
+    head("5. IS THE ANSWER IN THE TRACE — share of rollouts whose final number is absent from it")
     print(f"{'model':22s} {'baseline':>9s} {'below':>9s} {'above':>9s}")
     for n, R in data.items():
         cells = []
@@ -99,10 +99,10 @@ def main():
                 miss += not any(abs(a - x) / max(a, 1) < 0.005 for x in t)
             cells.append(miss / tot if tot else float("nan"))
         print(f"{n:22s} {cells[0]:9.2f} {cells[1]:9.2f} {cells[2]:9.2f}")
-    print("\nbaseline — контроль на пропуски судьи: там ответ почти всегда есть в трейсе.")
+    print("\nbaseline is the control for judge misses: there the answer is nearly always in the trace.")
 
-    head("6. ПРЫЖОК НА СТЫКЕ — (ответ − последняя оценка трейса) / порог, где они различаются")
-    print(f"{'model':22s} {'cond':11s} {'доля':>6s} {'медиана':>9s} {'вверх':>7s}")
+    head("6. THE JUMP AT THE HAND-OFF — (answer - last in-trace estimate) / threshold, where they differ")
+    print(f"{'model':22s} {'cond':11s} {'share':>6s} {'median':>9s} {'upward':>7s}")
     for n, R in data.items():
         for c in COND:
             g, tot = [], 0
@@ -116,14 +116,14 @@ def main():
             if tot and len(g):
                 print(f"{n:22s} {c:11s} {len(g)/tot:6.2f} {np.median(g):+9.3f} {(g > 0).mean():7.2f}")
 
-    head("7. ЧТО ТРЕЙС ГОВОРИТ О СЕБЕ — явный отказ поддаваться ставке")
-    print(f"{'model':22s} {'below':>9s} {'above':>9s}   (доля трейсов с явным «не дам ставке повлиять»)")
+    head("7. WHAT THE TRACE SAYS ABOUT ITSELF — explicit refusal to be swayed by the bet")
+    print(f"{'model':22s} {'below':>9s} {'above':>9s}   (share of traces explicitly disavowing the bet)")
     for n, R in data.items():
         cells = [np.mean([bool(DISAVOW.search(txt)) for _, _, txt in rollouts(dirs[n], c, R["traj"][c])])
                  for c in ("below_good", "above_good")]
         print(f"{n:22s} {cells[0]:9.2f} {cells[1]:9.2f}")
 
-    head("8. ДЛИНА РАССУЖДЕНИЯ — знаков в трейсе, медиана")
+    head("8. REASONING LENGTH — characters in the trace, median")
     print(f"{'model':22s} {'baseline':>9s} {'below':>9s} {'above':>9s} {'below/base':>11s}")
     for n, R in data.items():
         m = [np.median([len(t) for _, _, t in rollouts(dirs[n], c, R["traj"][c])]) for c in COND]

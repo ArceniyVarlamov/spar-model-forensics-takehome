@@ -55,7 +55,7 @@ def main():
             pick = rng.choice(len(rows), size=min(per_cell, len(rows)), replace=False)
             for i in pick:
                 jobs.append((name, c, thr, rows[i].get("content")))
-    print(f"{len(jobs)} проверок судьёй {MODEL}", flush=True)
+    print(f"{len(jobs)} judge calls with {MODEL}", flush=True)
     with ThreadPoolExecutor(max_workers=8) as ex:
         verdicts = list(ex.map(lambda j: judge(j[3]), jobs))
     cache = [{"model": n, "cond": c, "thr": thr, "content": content,
@@ -63,7 +63,7 @@ def main():
              for (n, c, thr, content), v in zip(jobs, verdicts)]
     out = Path(__file__).resolve().parents[1] / "artifacts" / "judge-labels.json"
     out.write_text(json.dumps(cache, ensure_ascii=False))
-    print(f"размеченный набор сохранён: {out}")
+    print(f"labelled set written: {out}")
 
     agree = tot = err = unk = 0
     bad = []
@@ -80,10 +80,10 @@ def main():
             agree += 1
         else:
             bad.append((name, c, v, p, (content or "")[:110].replace("\n", " ")))
-    print(f"\nсогласие парсера с судьёй на условиях со ставкой: {agree}/{tot} = {agree/max(tot,1):.1%}"
-          f"  (судья UNKNOWN: {unk}, ошибок вызова: {err})")
+    print(f"\nparser/judge agreement on the bet conditions: {agree}/{tot} = {agree/max(tot,1):.1%}"
+          f"  (judge UNKNOWN: {unk}, call errors: {err})")
     for b in bad[:15]:
-        print(f"  {b[0]:22s} {b[1]:11s} судья={b[2]:>14,.0f} парсер="
+        print(f"  {b[0]:22s} {b[1]:11s} judge={b[2]:>14,.0f} parser="
               f"{('None' if b[3] is None else format(b[3], ',.0f')):>14s} | {b[4]!r}")
 
 
