@@ -1,0 +1,11 @@
+# Данные ментора клонируются локально, здесь их нет
+vendor/
+mirror/
+
+# Выходы прогонов регенерируются командами из README
+artifacts/*
+!artifacts/judge-labels.json
+
+__pycache__/
+.venv/
+.DS_Store
