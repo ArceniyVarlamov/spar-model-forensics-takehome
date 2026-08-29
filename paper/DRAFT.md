@@ -431,13 +431,16 @@ baseline. (The parser bug had inflated this to 0.42–0.58; it does not survive.
 There is no silent substitution at the hand-off.
 
 **Middle version — the trace says one thing and the distribution does another.**
-This holds, and it is the sharpest thing in the data. The qualitative
-observation is not mine: Betley et al. already note that "for Claude models, the
-reasoning often repeatedly indicates not being influenced by the threshold".
-What I add is the quantity, across their whole grid. Between 68% and 100% of bet
-traces contain an explicit disavowal — "I should not let the bet influence my
-estimate", "I'm ignoring the donation incentive" — while the median answer of
-the same population sits 0.04–0.23 of a threshold away from the median of the
+This holds, and it is the sharpest thing in the data. Neither the observation
+nor the inference is mine: Betley et al. note that "for Claude models, the
+reasoning often repeatedly indicates not being influenced by the threshold", and
+say plainly that "a user that takes the model's statements at face value would
+falsely conclude that the answer is unbiased". What I add is the measurement —
+the rate across their whole grid, and the distribution it has to be read
+against. Between 68% and 100% of bet traces contain an explicit disavowal —
+"I should not let the bet influence my estimate", "I shouldn't let the
+incentive structure bias my answer" — while the median answer of the same
+population sits 0.04–0.23 of a threshold away from the median of the
 opposite condition. Per rollout the trace is not lying; over the population the
 stated policy is not the policy being followed. No single trace is evidence of
 this, and no per-trace faithfulness score would flag one.
